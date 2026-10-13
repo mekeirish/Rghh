@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mastercode - Premium PWA Factory</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4b6cb7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png">
+    <style>
+        :root { 
+            --bg: #1a1c20; --card-bg: #23272d; --shadow: #121417; 
+            --light: #2e333a; --accent: #4b6cb7; --text: #e0e0e0;
+            --danger: #ff5f56; --success: #27ae60; --warning: #f1c40f;
+        }
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg); 
+            margin: 0; padding: 20px; color: var(--text); display: flex; 
+            flex-direction: column; align-items: center; min-height: 100vh;
+        }
+        .container { width: 100%; max-width: 500px; padding-bottom: 50px; position: relative; }
+        h1 { text-align: center; font-size: 1.6rem; font-weight: 300; letter-spacing: 4px; color: #fff; margin-bottom: 30px; text-transform: uppercase; }
+
+        /* === GLASSMORPHISM === */
+        .card {
+            background: rgba(35, 39, 45, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 22px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            margin-bottom: 25px;
+        }
+        input, textarea {
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            color: #fff;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+            outline: none;
+            font-size: 1rem;
+        }
+        .btn, .btn-view, .sw-btn-icon {
+            background: rgba(35, 39, 45, 0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: var(--accent);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn:active, .btn-view:active, .sw-btn-icon:active {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: scale(0.98);
+        }
+        .btn-view { padding: 0 15px; border-radius: 12px; font-size: 0.7rem; white-space: nowrap; }
+        .btn-danger {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-size: 0.7rem;
+            cursor: pointer;
+            opacity: 0.6;
+            padding: 8px 0;
+            backdrop-filter: none;
+            box-shadow: none;
+        }
+        .btn-live {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--warning);
+            border-radius: 16px;
+            background: rgba(241, 196, 15, 0.08);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            color: var(--warning);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-live:hover { background: rgba(241, 196, 15, 0.15); }
+        .btn-live:active { transform: scale(0.98); }
+        .sw-btn-icon {
+            font-size: 1.4rem;
+            padding: 8px 12px;
+            border-radius: 30px;
+            margin-left: 10px;
+        }
+        .btn { width: 100%; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 12px; }
+        .btn:active { transform: scale(0.98); }
+
+        label { display: block; margin: 0 0 10px 5px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+        .token-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .led-container { display: flex; gap: 8px; }
+        .led { width: 10px; height: 10px; border-radius: 50%; background-color: #555; transition: 0.3s; }
+        .led-yellow { background-color: var(--warning); box-shadow: 0 0 10px var(--warning); animation: pulse-yellow 1s infinite; }
+        .led-green { background-color: var(--success); box-shadow: 0 0 10px var(--success); animation: none; }
+        .led-red { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); animation: none; }
+
+        @keyframes pulse-yellow {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(241, 196, 15, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
+        }
+
+        #status { margin-top: 25px; font-size: 0.75rem; padding: 18px; border-radius: 15px; display: none; background: rgba(22, 24, 28, 0.6); backdrop-filter: blur(4px); color: #888; font-family: monospace; border: 1px solid rgba(255,255,255,0.05); white-space: pre-wrap; line-height: 1.5; }
+        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(35, 39, 45, 0.8); backdrop-filter: blur(8px); color: var(--success); padding: 15px 30px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); font-weight: bold; z-index: 1000; transition: top 0.4s; border: 1px solid var(--success); }
+        .signature { margin-top: 50px; font-size: 0.7rem; color: #444; letter-spacing: 1.5px; text-align: center; width: 100%; }
+        .preview-icon { width: 80px; height: 80px; margin: 15px auto; border-radius: 18px; border: 2px solid var(--light); display: none; object-fit: cover; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* MODALE SW avec glassmorphism */
+        #sw-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(35, 39, 45, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid var(--warning);
+            border-radius: 24px;
+            padding: 20px;
+            z-index: 10001;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+        }
+        #sw-modal textarea {
+            width: 100%;
+            height: 400px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            background: rgba(30, 33, 38, 0.6);
+            color: #eee;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 10px;
+            box-sizing: border-box;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+        }
+        #sw-modal h3 { margin-top: 0; color: var(--warning); }
+        .sw-buttons { display: flex; justify-content: flex-end; gap: 12px; margin-top: 15px; }
+        .sw-buttons button {
+            background: var(--accent);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            backdrop-filter: blur(4px);
+        }
+        .sw-buttons button.reset { background: var(--danger); }
+        #sw-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 10000;
+        }
+        .header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    </style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4b6cb7">
+<link rel="apple-touch-icon" href="icon.png"></head>
+<body>
+
+<div id="toast">✅ Action Réussie</div>
+
+<div class="container">
+    <div class="header-row">
+        <h1>Mastercode</h1>
+        <button class="sw-btn-icon" onclick="openSwModal()" title="Script personnalisé (SW)">🧠 SW</button>
+    </div>
+
+    <div class="card">
+        <label>GitHub Access Token</label>
+        <div class="token-row">
+            <input type="password" id="ghToken" placeholder="ghp_..." oninput="saveKey('ghToken', this.value)">
+            <button class="btn-view" onclick="toggleView('ghToken')">VOIR</button>
+            <button class="btn-view" onclick="pasteToken()">COLLER</button>
+        </div>
+        <button class="btn-danger" onclick="clearAllData()">🗑️ EFFACER LES CLÉS</button>
+    </div>
+
+    <div class="card">
+        <label>Nom du Projet</label>
+        <input type="text" id="appName" placeholder="ex: master-factory">
+        
+        <label style="margin-top:20px;">Code HTML Source</label>
+        <textarea id="htmlInput" rows="8" placeholder="Colle le code ici..."></textarea>
+        
+        <label style="margin-top:20px;">Icône PWA (Tous formats acceptés)</label>
+        <input type="file" id="iconInput" accept="image/*" onchange="previewIcon(this)">
+        <img id="iconPreview" class="preview-icon">
+    </div>
+
+    <button class="btn" onclick="generatePWA()" id="mainBtn">
+        <div class="spinner" id="loader"></div>
+        <span>FORGER L'APPLICATION</span>
+    </button>
+
+    <button class="btn" onclick="injectPwaToGitHub()" id="injectBtn">
+        <span>Yes, WE Can.</span>
+    </button>
+
+    <button class="btn-live" id="liveBtn" onclick="openLiveSite()">
+        <div class="led-container">
+            <div class="led" id="led1"></div>
+            <div class="led" id="led2"></div>
+        </div>
+        <span>VOIR LE SITE LIVE</span>
+    </button>
+
+    <div id="status"></div>
+    <button class="btn" onclick="copyReport()" id="copyBtn" style="color: #666; font-size: 0.75rem; display: none; background:none; box-shadow:none; backdrop-filter:none; border:none; padding:0;">📋 COPIER LE RAPPORT</button>
+
+    <div class="signature">Made by Laiche Brahim 2026 Paris</div>
+</div>
+
+<!-- MODALE SW (SCRIPT PERSONNALISÉ) -->
+<div id="sw-overlay"></div>
+<div id="sw-modal">
+    <h3>✍️ Script personnalisé (JavaScript)</h3>
+    <p style="font-size:0.75rem; color:#aaa;">Ce code sera injecté à la fin du &lt;body&gt;. Il peut surcharger les fonctions existantes ou ajouter des fonctionnalités.</p>
+    <textarea id="customScript" placeholder="// Collez votre code JS ici..."></textarea>
+    <div class="sw-buttons">
+        <button class="reset" onclick="resetCustomScript()">🗑️ Réinitialiser</button>
+        <button onclick="saveCustomScript()">💾 Sauvegarder</button>
+        <button onclick="closeSwModal()">Fermer</button>
+    </div>
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+    // ---------- SON TOM ----------
+    function playTom(freq, duration) {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const sampleRate = audioCtx.sampleRate;
+            const bufferSize = sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const t = i / sampleRate;
+                const env = Math.exp(-t / (duration * 0.3));
+                data[i] = Math.sin(2 * Math.PI * freq * t) * env;
+            }
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            const gain = audioCtx.createGain();
+            gain.gain.value = 0.3;
+            source.connect(gain);
+            gain.connect(audioCtx.destination);
+            source.start();
+            source.stop(audioCtx.currentTime + duration);
+        } catch (e) { /* ignore */ }
+    }
+
+    document.addEventListener('click', function(e) {
+        const target = e.target.closest('button');
+        if (target) {
+            playTom(140, 0.4);
+        }
+    });
+
+    // ---------- GESTION SCRIPT PERSONNALISÉ ----------
+    const CUSTOM_SCRIPT_KEY = 'mastercode_custom_script';
+
+    function loadCustomScriptFromStorage() {
+        const saved = localStorage.getItem(CUSTOM_SCRIPT_KEY);
+        if (saved) document.getElementById('customScript').value = saved;
+    }
+
+    function saveCustomScript() {
+        const script = document.getElementById('customScript').value;
+        localStorage.setItem(CUSTOM_SCRIPT_KEY, script);
+        showToast("✅ Script personnalisé sauvegardé !");
+        closeSwModal();
+    }
+
+    function resetCustomScript() {
+        if (confirm("Supprimer définitivement votre script personnalisé ?")) {
+            localStorage.removeItem(CUSTOM_SCRIPT_KEY);
+            document.getElementById('customScript').value = '';
+            showToast("Script personnalisé réinitialisé.");
+            closeSwModal();
+        }
+    }
+
+    function openSwModal() {
+        loadCustomScriptFromStorage();
+        document.getElementById('sw-modal').style.display = 'block';
+        document.getElementById('sw-overlay').style.display = 'block';
+    }
+
+    function closeSwModal() {
+        document.getElementById('sw-modal').style.display = 'none';
+        document.getElementById('sw-overlay').style.display = 'none';
+    }
+
+    // ---------- FONCTION D'INJECTION PWA SUR GITHUB ----------
+    async function injectPwaToGitHub() {
+        const ghToken = document.getElementById('ghToken').value;
+        const appName = document.getElementById('appName').value.trim().replace(/\s+/g, '-');
+        const sourceHtml = document.getElementById('htmlInput').value.trim();
+
+        if (!ghToken || !appName || !sourceHtml) {
+            showToast("❌ Token, Nom ou HTML manquant", true);
+            return;
+        }
+
+        let owner = "";
+        try {
+            const userRes = await fetch('https://api.github.com/user', {
+                headers: { 'Authorization': `token ${ghToken}` }
+            });
+            if (!userRes.ok) throw new Error("Token invalide");
+            const userData = await userRes.json();
+            owner = userData.login;
+        } catch (err) {
+            showToast("❌ Token GitHub invalide", true);
+            return;
+        }
+
+        const repo = appName;
+        const path = 'index.html';
+        const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+        const headers = {
+            'Authorization': `token ${ghToken}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+        };
+
+        const liveBtn = document.getElementById('liveBtn');
+        const led1 = document.getElementById('led1');
+        const led2 = document.getElementById('led2');
+        liveOwner = owner;
+        liveRepo = repo;
+        liveBtn.style.display = 'flex';
+        led1.className = 'led led-yellow';
+        led2.className = 'led led-yellow';
+
+        try {
+            updateStatus("🔍 Info fichier distant...", false);
+            const getResp = await fetch(url, { headers });
+            let sha = null;
+            if (getResp.status === 200) {
+                const fileData = await getResp.json();
+                sha = fileData.sha;
+            }
+
+            const headElements = `
+<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4b6cb7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon.png">
+`;
+
+            const swScript = `
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW enregistré'))
+        .catch(err => console.error('Erreur SW :', err));
+    });
+  }
+<\/script>
+`;
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(sourceHtml, 'text/html');
+
+            if (doc.head) {
+                doc.head.insertAdjacentHTML('beforeend', headElements);
+            } else {
+                doc.documentElement.insertAdjacentHTML('afterbegin', '<head>' + headElements + '</head>');
+            }
+
+            if (doc.body) {
+                doc.body.insertAdjacentHTML('beforeend', swScript);
+            } else {
+                doc.documentElement.insertAdjacentHTML('beforeend', '<body>' + swScript + '
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
+</body>');
+            }
+
+            let updatedHtml = doc.documentElement.outerHTML;
+            if (!sourceHtml.toLowerCase().includes('<!doctype html>')) {
+                updatedHtml = '<!DOCTYPE html>\n' + updatedHtml;
+            }
+
+            const encodedContent = btoa(unescape(encodeURIComponent(updatedHtml)));
+
+            updateStatus("📤 Envoi à GitHub...", false);
+            const putBody = {
+                message: "feat(pwa): injection PWA via Mastercode",
+                content: encodedContent
+            };
+            if (sha) putBody.sha = sha;
+
+            const putResp = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(putBody) });
+
+            if (!putResp.ok) throw new Error("Échec upload HTML");
+
+            updateStatus("✅ index.html mis à jour !", false);
+            showToast("✅ Injection terminée !");
+
+            led1.className = 'led led-green';
+            led2.className = 'led led-green';
+
+        } catch (err) {
+            updateStatus(`❌ Erreur : ${err.message}`, false);
+            showToast(`❌ Échec : ${err.message}`, true);
+            led1.className = 'led led-red';
+            led2.className = 'led led-red';
+        }
+    }
+
+    // ---------- HELPERS ET STOCKAGE ----------
+    const saveKey = (id, val) => localStorage.setItem(id, val);
+    document.getElementById('ghToken').value = localStorage.getItem('ghToken') || '';
+
+    let liveOwner = "";
+    let liveRepo = "";
+    let deploymentInterval = null;
+
+    function toggleView(id) {
+        const el = document.getElementById(id);
+        const btn = event.target;
+        if (el.type === "password") { el.type = "text"; btn.innerText = "CACHER"; } 
+        else { el.type = "password"; btn.innerText = "VOIR"; }
+    }
+
+    async function pasteToken() {
+        try {
+            const text = await navigator.clipboard.readText();
+            const el = document.getElementById('ghToken');
+            el.value = text;
+            saveKey('ghToken', text);
+            showToast("📋 Token collé !");
+        } catch (err) {
+            showToast("⚠️ Accès presse-papiers refusé", true);
+        }
+    }
+
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.color = isError ? "var(--danger)" : "var(--success)";
+        t.style.borderColor = isError ? "var(--danger)" : "var(--success)";
+        t.style.top = "30px";
+        setTimeout(() => { t.style.top = "-100px"; }, 4000);
+    }
+
+    function clearAllData() {
+        if(confirm("Supprimer les clés ?")) { localStorage.clear(); location.reload(); }
+    }
+
+    let base64Icon = "";
+    function previewIcon(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.getElementById('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = 512; canvas.height = 512;
+                    let sourceX = 0, sourceY = 0, sourceWidth = img.width, sourceHeight = img.height;
+                    if (img.width > img.height) {
+                        sourceWidth = img.height; sourceX = (img.width - img.height) / 2;
+                    } else if (img.height > img.width) {
+                        sourceHeight = img.width; sourceY = (img.height - img.width) / 2;
+                    }
+                    ctx.clearRect(0, 0, 512, 512);
+                    ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, 512, 512);
+                    const dataUrl = canvas.toDataURL('image/png');
+                    base64Icon = dataUrl.split(',')[1];
+                    const preview = document.getElementById('iconPreview');
+                    preview.src = dataUrl; preview.style.display = 'block';
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function updateStatus(msg, clear = false) {
+        const s = document.getElementById('status');
+        s.style.display = 'block';
+        document.getElementById('copyBtn').style.display = 'flex';
+        if (clear) s.innerHTML = msg; else s.innerHTML += `\n> ${msg}`;
+    }
+
+    function copyReport() {
+        navigator.clipboard.writeText(document.getElementById('status').innerText);
+        showToast("Rapport copié !");
+    }
+
+    async function checkDeploymentStatus() {
+        const ghToken = document.getElementById('ghToken').value;
+        if (!liveOwner || !liveRepo || !ghToken) return;
+
+        try {
+            const res = await fetch(`https://api.github.com/repos/${liveOwner}/${liveRepo}/actions/runs?per_page=1`, {
+                headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github+json' }
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.workflow_runs && data.workflow_runs.length > 0) {
+                const run = data.workflow_runs[0];
+                const l1 = document.getElementById('led1');
+                const l2 = document.getElementById('led2');
+                l1.className = 'led'; l2.className = 'led';
+                if (run.status === 'in_progress' || run.status === 'queued') {
+                    l1.classList.add('led-yellow'); l2.classList.add('led-yellow');
+                } else if (run.status === 'completed') {
+                    if (run.conclusion === 'success') {
+                        l1.classList.add('led-green'); l2.classList.add('led-green');
+                    } else {
+                        l1.classList.add('led-red'); l2.classList.add('led-red');
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Erreur statut Live :", err);
+        }
+    }
+
+    function openLiveSite() {
+        if (liveOwner && liveRepo) {
+            window.open(`https://${liveOwner.toLowerCase()}.github.io/${liveRepo}/`, '_blank');
+        }
+    }
+
+    // ---------- FONCTION GENERATE PWA CORRIGÉE ----------
+    async function generatePWA() {
+        const ghToken = document.getElementById('ghToken').value;
+        const appName = document.getElementById('appName').value.trim().replace(/\s+/g, '-');
+        let htmlInputContent = document.getElementById('htmlInput').value.trim();
+        const btn = document.getElementById('mainBtn');
+        const loader = document.getElementById('loader');
+
+        if (!ghToken || !appName || !htmlInputContent || !base64Icon) return showToast("⚠️ Données manquantes", true);
+
+        btn.disabled = true; loader.style.display = 'block';
+        document.getElementById('liveBtn').style.display = 'none';
+        if (deploymentInterval) clearInterval(deploymentInterval);
+        
+        updateStatus("--- SEQUENCE MASTERCODE ACTIVÉE ---", true);
+
+        try {
+            const userRes = await fetch('https://api.github.com/user', { headers: { 'Authorization': `token ${ghToken}` } });
+            if (!userRes.ok) throw new Error("Accès GitHub refusé");
+            const userData = await userRes.json();
+            const owner = userData.login;
+
+            const repoCheck = await fetch(`https://api.github.com/repos/${owner}/${appName}`, { headers: { 'Authorization': `token ${ghToken}` } });
+            if (repoCheck.status === 404) {
+                updateStatus("Création du dépôt...");
+                await fetch('https://api.github.com/user/repos', {
+                    method: 'POST',
+                    headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: appName, auto_init: true })
+                });
+            }
+
+            updateStatus("Injection du moteur PWA...");
+            
+            const tagS = '<script>';
+            const tagE = '<\/script>';
+            const headE = '</head>';
+            const bodyE = '</body>';
+            
+            const swReg = `\n${tagS}if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}${tagE}\n`;
+            const pwaTags = `\n<link rel="manifest" href="manifest.json">\n<meta name="theme-color" content="#4b6cb7">\n<link rel="apple-touch-icon" href="icon.png">`;
+
+            let finalHtml = htmlInputContent;
+            if (finalHtml.toLowerCase().includes(headE)) {
+                finalHtml = finalHtml.replace(new RegExp(headE, 'i'), `${pwaTags}${headE}`);
+            } else {
+                finalHtml = `<head>${pwaTags}</head>` + finalHtml;
+            }
+            
+            const customScriptRaw = localStorage.getItem(CUSTOM_SCRIPT_KEY);
+            let customScriptBlock = '';
+            if (customScriptRaw && customScriptRaw.trim() !== '') {
+                customScriptBlock = `\n<!-- Custom script -->\n${tagS}\n${customScriptRaw}\n${tagE}\n`;
+                updateStatus("Script personnalisé injecté...");
+            }
+            
+            if (finalHtml.toLowerCase().includes(bodyE)) {
+                finalHtml = finalHtml.replace(new RegExp(bodyE, 'i'), `${customScriptBlock}${swReg}${bodyE}`);
+            } else {
+                finalHtml += `${customScriptBlock}${swReg}`;
+            }
+
+            // CORRECTION CRITIQUE MANIFEST : ID + SCOPE DYNAMIQUES
+            const manifest = JSON.stringify({
+                "id": `/${appName}/`,
+                "name": appName, 
+                "short_name": appName, 
+                "start_url": `/${appName}/index.html`,
+                "scope": `/${appName}/`,
+                "display": "standalone", 
+                "background_color": "#1a1c20", 
+                "theme_color": "#4b6cb7",
+                "icons": [
+                    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+                    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+                ]
+            }, null, 2);
+
+            // CORRECTION CRITIQUE SERVICE WORKER
+            const sw = `const cacheName='${appName}-v2';
+self.addEventListener('install',e=>{
+  self.skipWaiting();
+  e.waitUntil(caches.open(cacheName).then(c=>c.addAll(['./index.html','./manifest.json','./icon.png'])));
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.map(key=>{if(key!==cacheName)return caches.delete(key);}))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',e=>{
+  if(e.request.url.includes('manifest.json')){
+    e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+    return;
+  }
+  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+});`;
+
+            const utf8b64 = (s) => btoa(unescape(encodeURIComponent(s)));
+
+            const files = [
+                { path: 'index.html', content: utf8b64(finalHtml) },
+                { path: 'manifest.json', content: utf8b64(manifest) },
+                { path: 'sw.js', content: utf8b64(sw) },
+                { path: 'icon.png', content: base64Icon }
+            ];
+
+            for (const file of files) {
+                updateStatus(`Upload : ${file.path}...`);
+                let sha = null;
+                const getF = await fetch(`https://api.github.com/repos/${owner}/${appName}/contents/${file.path}`, { headers: { 'Authorization': `token ${ghToken}` } });
+                if(getF.status === 200) sha = (await getF.json()).sha;
+
+                await fetch(`https://api.github.com/repos/${owner}/${appName}/contents/${file.path}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'Mastercode Sync', content: file.content, sha: sha })
+                });
+            }
+
+            updateStatus("Activation GitHub Pages...");
+            await new Promise(r => setTimeout(r, 2000));
+            await fetch(`https://api.github.com/repos/${owner}/${appName}/pages`, {
+                method: 'POST',
+                headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github+json' },
+                body: JSON.stringify({ source: { branch: 'main', path: '/' } })
+            });
+
+            updateStatus("Opération terminée avec succès.");
+            showToast("✅ Mastercode : Forgé !");
+            
+            liveOwner = owner;
+            liveRepo = appName;
+            
+            document.getElementById('led1').className = 'led led-yellow';
+            document.getElementById('led2').className = 'led led-yellow';
+            document.getElementById('liveBtn').style.display = 'flex';
+            
+            checkDeploymentStatus();
+            deploymentInterval = setInterval(checkDeploymentStatus, 4000);
+
+        } catch (err) {
+            updateStatus("❌ ERREUR : " + err.message);
+            showToast("Échec de la forge", true);
+        } finally {
+            btn.disabled = false; loader.style.display = 'none';
+        }
+    }
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.error(err));
+    });
+  }
+</script>
+</body>
+</html>
